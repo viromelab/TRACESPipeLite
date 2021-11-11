@@ -75,11 +75,26 @@ PROGRAM_EXISTS () {
   if ! [ -x "$(command -v $1)" ];
     then
     echo -e "\e[41mERROR\e[49m: $1 is not installed." >&2;
-    echo -e "\e[42mTIP\e[49m: Try: TRACESPipeLite.sh --install" >&2;
+    echo -e "\e[42mTIP\e[49m: Try: ./TRACESPipeLite.sh --install" >&2;
     exit 1;
     else
     echo -e "\e[42mSUCCESS!\e[49m";
     fi
+  }
+#
+################################################################################
+#
+CHECK_PROGRAMS () {
+  PROGRAM_EXISTS "AdapterRemoval";
+  PROGRAM_EXISTS "gto_fasta_extract_read_by_pattern";
+  PROGRAM_EXISTS "FALCON";
+  PROGRAM_EXISTS "bwa";
+  PROGRAM_EXISTS "samtools";
+  PROGRAM_EXISTS "bcftools";
+  PROGRAM_EXISTS "bedops";
+  PROGRAM_EXISTS "bedtools";
+  PROGRAM_EXISTS "igv";
+  PROGRAM_EXISTS "tabix";
   }
 #
 ################################################################################
@@ -204,16 +219,7 @@ if [[ "$INSTALL" -eq "1" ]];
   conda install -c bioconda bedops -y
   conda install -c bioconda bedtools -y
   #
-  PROGRAM_EXISTS "AdapterRemoval";
-  PROGRAM_EXISTS "gto_fasta_extract_read_by_pattern";
-  PROGRAM_EXISTS "FALCON";
-  PROGRAM_EXISTS "bwa";
-  PROGRAM_EXISTS "samtools";
-  PROGRAM_EXISTS "bcftools";
-  PROGRAM_EXISTS "bedops";
-  PROGRAM_EXISTS "bedtools";
-  PROGRAM_EXISTS "igv";
-  PROGRAM_EXISTS "tabix";
+  CHECK_PROGRAMS  
   #
   echo "Generating adapters for AdapterRemoval ...";
   echo "TACACTCTTTCCCTACACGACGCTCTTCCGATCT      AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA" >  adapters_ar.fa;
@@ -231,6 +237,7 @@ if [[ "$RUN" -eq "1" ]];
   CHECK_INPUT $READS1
   CHECK_INPUT adapters_ar.fa
   CHECK_INPUT $DATABASE
+  CHECK_PROGRAMS
   #
   rm reads-tracespipe-run-tmp.fq $OUTPUT/ -fr
   #
