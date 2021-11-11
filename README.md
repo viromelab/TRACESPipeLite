@@ -15,8 +15,8 @@ chmod +x *.sh
 ## 2. Running example ##
 
 ```
-./TRACESPipeLite.sh --reads1 test-fw.fq.gz --reads2 test-rv.fq.gz \
---database VDB.fasta --output test_viral_analysis --threads 8
+./TRACESPipeLite.sh --threads 8 --reads1 reads_forward.fq.gz \
+--reads2 reads_forward.fq.gz --database VDB.fa --output test_viral_analysis
 ```
 
 ## 3. Usage ##
@@ -56,7 +56,7 @@ chmod +x *.sh
  Example -----------------------------------------------  
                                                           
  TRACESPipeLite.sh --reads1 reads_forward.fq.gz \        
-   --reads2 reads_reverse.fq.gz --database VDB.fasta \   
+   --reads2 reads_reverse.fq.gz --database VDB.fa \   
    --output lite_viral_analysis --threads 8               
                                                           
  -------------------------------------------------------  
