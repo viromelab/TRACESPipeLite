@@ -4,7 +4,7 @@
 [![Speed](https://img.shields.io/static/v1.svg?label=Ultra-Fast&message=Ultra%20speed%20performance&color=green)](#)
 [![Release](https://img.shields.io/static/v1.svg?label=Release&message=v1.0.0&color=orange)](#)
 
-Lite version of TRACESPipe: ultra-fast reconstruction of viral genomes providing consensus sequences, breadth, depth coverage and profiles, and others. Assembly is reference-based.
+Lite version of TRACESPipe: ultra-fast reconstruction of viral genomes providing consensus sequences, breadth, depth coverage and profiles, and others. Assembly is reference-based. The viral database is freely provided.
 
 ## 1. Installation ##
 
