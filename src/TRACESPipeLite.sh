@@ -7,7 +7,7 @@ READS1="";
 READS2="";
 DATABASE="VDB.fa";
 OUTPUT="lite_analysis";
-MIN_SIMILARITY="5";
+MIN_SIMILARITY="3";
 MAX_COVERAGE_PROFILE=0;
 COVERAGE_MIN_X="0";
 COVERAGE_MAX="1000";
@@ -48,7 +48,7 @@ SHOW_MENU () {
   echo " Example -----------------------------------------------  ";
   echo "                                                          ";
   echo " TRACESPipeLite.sh --reads1 reads_forward.fq.gz \\        ";
-  echo "   --reads2 reads_reverse.fq.gz --database VDB.fasta \\   ";
+  echo "   --reads2 reads_reverse.fq.gz --database VDB.fa \\      ";
   echo "   --output lite_viral_analysis --threads 8               ";
   echo "                                                          ";
   echo " -------------------------------------------------------  ";
@@ -281,7 +281,7 @@ if [[ "$RUN" -eq "1" ]];
     #
     echo -e "\e[34m[TRACESPipeLite]\e[32m Processing $V_NAME ...\e[0m";
     #
-    if [[ "$SIMILARITY" != "-" ]] && [[ "$SIMILARITY" > "$MIN_SIMILARITY" ]];
+    if [[ "$SIMILARITY" != "-" ]] && [[ "$SIMILARITY" -ge "$MIN_SIMILARITY" ]];
       then
       #
       echo -e "\e[34m[TRACESPipeLite]\e[32m Minimum similarity reach in $V_NAME ...\e[0m";
