@@ -48,7 +48,8 @@ chmod +x *.sh
  -dr <INT>, --drop <INT>        Coverage drop size,       
  -cx <INT>, --start <INT>       Coverage start x-axis,    
  -ma <INT>, --maximum <INT>     Coverage maximum (crop),  
-                                                          
+ -si <INT>, --similarity <DBL>  Minimum similarity for    
+                                applying reconstruction,  
  -t  <INT>, --threads <INT>     Number of threads,        
  -o  <STR>, --output <STR>      Output folder name,       
                                                           
@@ -60,10 +61,10 @@ chmod +x *.sh
  Example -----------------------------------------------  
                                                           
  TRACESPipeLite.sh --reads1 reads_forward.fq.gz \        
-   --reads2 reads_reverse.fq.gz --database VDB.fa \   
+   --reads2 reads_reverse.fq.gz --database VDB.fa \      
    --output lite_viral_analysis --threads 8               
                                                           
- -------------------------------------------------------  
+ -------------------------------------------------------
 ```
 
 ## 4. Citation ##
