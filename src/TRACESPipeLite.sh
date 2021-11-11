@@ -266,7 +266,7 @@ if [[ "$RUN" -eq "1" ]];
   #
   ## RUN VIRAL METAGENOMIC COMPOSITION =========================================
   #
-  FALCON -v -n $THREADS -t 5000 -F -m 6:1:1:0/0 -m 13:50:1:0/0 -m 19:500:1:5/10 -g 0.85 -c 50 -x top-metagenomics.csv reads-tracespipe-run-tmp.fq $DATABASE
+  FALCON -v -n $THREADS -t 100000 -F -m 6:1:1:0/0 -m 13:50:1:0/0 -m 19:500:1:5/10 -g 0.85 -c 50 -x top-metagenomics.csv reads-tracespipe-run-tmp.fq $DATABASE
   cp top-metagenomics.csv $OUTPUT/
   #
   ## GET HIGHEST SIMILAR REFERENCE =============================================
