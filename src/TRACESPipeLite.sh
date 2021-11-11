@@ -6,8 +6,8 @@ THREADS="8";
 READS1="";
 READS2="";
 DATABASE="VDB.fa";
-OUTPUT="lite_analysis";
-MIN_SIMILARITY="3";
+OUTPUT="out_analysis";
+MIN_SIMILARITY="3.0";
 MAX_COVERAGE_PROFILE=0;
 COVERAGE_MIN_X="0";
 COVERAGE_MAX="1000";
@@ -36,7 +36,8 @@ SHOW_MENU () {
   echo " -dr <INT>, --drop <INT>        Coverage drop size,       ";
   echo " -cx <INT>, --start <INT>       Coverage start x-axis,    ";
   echo " -ma <INT>, --maximum <INT>     Coverage maximum (crop),  ";
-  echo "                                                          ";
+  echo " -si <INT>, --similarity <DBL>  Minimum similarity for    ";
+  echo "                                applying reconstruction,  ";
   echo " -t  <INT>, --threads <INT>     Number of threads,        ";
   echo " -o  <STR>, --output <STR>      Output folder name,       ";
   echo "                                                          ";
@@ -177,6 +178,11 @@ while [[ $# -gt 0 ]]
       SHOW_HELP=0;
       shift 2;
     ;;
+    -si|--similarity)
+      MIN_SIMILARITY="$2";
+      SHOW_HELP=0;
+      shift 2;
+    ;;
     -o|--output)
       OUTPUT="$2";
       shift 2;
@@ -219,7 +225,7 @@ if [[ "$INSTALL" -eq "1" ]];
   conda install -c bioconda bedops -y
   conda install -c bioconda bedtools -y
   #
-  CHECK_PROGRAMS  
+  CHECK_PROGRAMS
   #
   echo "Generating adapters for AdapterRemoval ...";
   echo "TACACTCTTTCCCTACACGACGCTCTTCCGATCT      AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA" >  adapters_ar.fa;
@@ -265,7 +271,7 @@ if [[ "$RUN" -eq "1" ]];
   #
   ## GET HIGHEST SIMILAR REFERENCE =============================================
   #
-  rm -f best-viral-metagenomics.txt 
+  rm -f best-viral-metagenomics.txt
   for VIRUS in "${VIRUSES[@]}"
     do
     printf "%s\t" "$VIRUS" >> best-viral-metagenomics.txt;
@@ -283,13 +289,17 @@ if [[ "$RUN" -eq "1" ]];
     do
     #
     V_NAME=`echo $vline | awk '{ print $1 }'`;
-    SIMILARITY=`echo $vline | awk '{ print $2 }'`;
+    SIMILARITY=`echo $vline | awk '{ print $2*1 }'`;
+    SIM_CORR=`printf "%.4f" "$SIMILARITY"`;
     GID=`echo $vline | awk '{ print $3 }'`;
     #
     echo -e "\e[34m[TRACESPipeLite]\e[32m Processing $V_NAME ...\e[0m";
     #
-    if [[ "$SIMILARITY" != "-" ]] && [[ "$SIMILARITY" -ge "$MIN_SIMILARITY" ]];
-      then
+    echo "vline: $vline";
+    echo "SIMILARITY: $SIMILARITY"
+    echo "SIM_CORR: $SIM_CORR"
+    if [[ "$SIMILARITY" != "-" ]]; then
+      if (($(echo "$SIM_CORR > $MIN_SIMILARITY" |bc -l))); then
       #
       echo -e "\e[34m[TRACESPipeLite]\e[32m Minimum similarity reach in $V_NAME ...\e[0m";
       #
@@ -297,7 +307,7 @@ if [[ "$RUN" -eq "1" ]];
       #
       gto_fasta_extract_read_by_pattern -p "$GID" < VDB.fa | awk '/^>/{if(N)exit;++N;} {print;}' > $V_NAME.fa;
       #
-      bwa index $V_NAME.fa 
+      bwa index $V_NAME.fa
       bwa aln -l 1000 -n 0.01 $V_NAME.fa reads-tracespipe-run-tmp.fq > $V_NAME-READS.sai
       bwa samse $V_NAME.fa $V_NAME-READS.sai reads-tracespipe-run-tmp.fq > $V_NAME-READS.sam
       samtools view -bSh $V_NAME-READS.sam > $V_NAME-READS.bam;
@@ -308,7 +318,7 @@ if [[ "$RUN" -eq "1" ]];
       #
       bedtools genomecov -ibam RD-SORT-FIL-$V_NAME-READS.bam -bga > $V_NAME-coverage.bed
       awk '$4 < 1' $V_NAME-coverage.bed > $V_NAME-zero-coverage.bed
-      samtools faidx $V_NAME.fa 
+      samtools faidx $V_NAME.fa
       samtools mpileup -Ou -f $V_NAME.fa RD-SORT-FIL-$V_NAME-READS.bam \
       | bcftools call --ploidy 1 -P 9.9e-1 -mv -Oz -o $V_NAME-calls.vcf.gz
       bcftools index $V_NAME-calls.vcf.gz
@@ -347,7 +357,7 @@ if [[ "$RUN" -eq "1" ]];
       ./get_best_src/TRACES_project_coordinates.sh $OUTPUT/$V_NAME/$V_NAME-coverage.bed $COVERAGE_MAX | gto_filter -w $COVERAGE_WINDOW_SIZE -d $COVERAGE_DROP > x.projected.profile;
       DEPTH=`./get_best_src/TRACES_project_coordinates.sh $OUTPUT/$V_NAME/$V_NAME-coverage.bed $COVERAGE_MAX | awk '{sum+=$2} END { print sum/NR}'`;
       #
-      printf "$V_NAME\t$GID\t$TOTAL_SIZE\t$SIMILARITY\t$BREADTH\t$DEPTH\n" >> $OUTPUT/final-results.txt;
+      printf "$V_NAME\t$GID\t$TOTAL_SIZE\t$SIM_CORR\t$BREADTH\t$DEPTH\n" >> $OUTPUT/final-results.txt;
       #
       if [[ "$COVERAGE_LOG_SCALE" -eq "" ]];
         then
@@ -403,7 +413,7 @@ EOF
 EOF
       fi
       cp coverage-$V_NAME.pdf $OUTPUT/$V_NAME/
-      rm -f coverage-$V_NAME.pdf x.projected.profile; 
+      rm -f coverage-$V_NAME.pdf x.projected.profile;
       #
       rm -f $V_NAME-consensus.fa $V_NAME-zero-coverage.bed $V_NAME-coverage.bed \
       $V_NAME-calls.bed $V_NAME-calls.vcf.gz $V_NAME-calls.norm.flt-indels.vcf.gz \
@@ -416,10 +426,11 @@ EOF
       RD-SORT-FIL-$V_NAME-READS.bam.bai $V_NAME.fa.amb $V_NAME.fa.ann \
       $V_NAME.fa.bwt $V_NAME.fa.fai $V_NAME.fa.pac $V_NAME.fa.sa;
       #
+      fi
     fi
     done
   #
-  rm -f reads-tracespipe-run-tmp.fq; 
+  rm -f reads-tracespipe-run-tmp.fq;
   rm -f top-metagenomics.csv best-viral-metagenomics.txt;
   #
   fi
