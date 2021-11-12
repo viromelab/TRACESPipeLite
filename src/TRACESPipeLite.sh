@@ -112,7 +112,7 @@ declare -a VIRUSES=("B19" "HV1" "HV2" "HV3" "HV4" "HV5" "HV6" "HV6A" "HV6B"
                     "HV7" "HV8" "POLY1" "POLY2" "POLY3" "POLY4" "POLY5" "POLY6" 
 		    "POLY7" "POLY8" "POLY9" "POLY10" "POLY11" "POLY12" "POLY13" 
 		    "POLY14" "HAV" "HBV" "HCV" "HDV" "HEV" "HPV" "TTV" "HBOV1" 
-		    "HBOVNOT1" "VARV" "SV40" "CUTA" "SENV" "SARS2" "HERV");
+		    "HBOVNOT1" "VARV" "SV40" "CUTA" "SENV" "EV" "SARS2" "HERV");
 #
 ################################################################################
 #
