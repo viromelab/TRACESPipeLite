@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 RESULT=`cat top-metagenomics.csv \
-| grep -a -e "JC polyomavirus" -e "JC_polyomavirus" -e "JC_virus" -e "JC virus" -e "olyomavirus_2 " -e "olyomavirus 2 " -e "olyomavirus_2|" -e "olyomavirus 2|" -e "JCPyV" -e "NC_001699" \
+| grep -a -e "JC polyomavirus" -e "JC_polyomavirus" -e "JC_virus" -e "JC virus" -e "olyomavirus_2 " -e "olyomavirus 2 " -e "olyomavirus_2|" -e "olyomavirus 2|" -e "JCPyV" -e "NC_001699" -e "NC001699" \
 | grep -a -e "omplete genome" -e "omplete_genome" \
 | awk '{ if($3 > 0 && $2 > 3500 && $2 < 7000) print $3"\t"$4; }' \
 | head -n 1 \
