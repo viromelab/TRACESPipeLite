@@ -296,7 +296,7 @@ if [[ "$RUN" -eq "1" ]];
     #
     echo -e "\e[34m[TRACESPipeLite]\e[32m Processing $V_NAME ...\e[0m";
     #
-    echo "vline: $vline";
+    echo "ORGANISM: $vline";
     echo "SIMILARITY: $SIMILARITY"
     echo "SIM_CORR: $SIM_CORR"
     if [[ "$SIMILARITY" != "-" ]]; then
