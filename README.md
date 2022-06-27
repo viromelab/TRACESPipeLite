@@ -16,14 +16,75 @@ chmod +x *.sh
 ./TRACESPipeLite.sh --install
 ```
 
-## 2. Running example ##
+## 2. Database quality check ##
+
+The database quality check can be provided for the following 42 human viruses:
+```
+B19V
+BufaV
+HBV
+HHV7
+HPV16
+HPV31
+HPV51
+HPV59
+HPV77
+HPyV6
+HSV-1
+KI
+NJPyV
+TTV
+BKpV
+CutaV
+HCMV
+HHV8
+HPV18
+HPV39
+HPV56
+HPV68
+HPyV10
+HPyV7
+HSV-2
+LIPyV
+STLPyV
+VZV
+BocaV
+EBV
+HHV6
+HPV11
+HPV2
+HPV45
+HPV58
+HPV6
+HPyV12
+HPyV9
+JCV
+MCPyV
+TSPyV
+WUHPyV
+
+```
+To create the PDF with the respective quality controls, for each viruses there will be the need to create a file as
+```
+<virus_name>.txt
+```
+containing the IDs (one for each line) for the respective virus type.
+
+After, there will be the need to run:
+```
+./RunDB.sh
+```
+
+
+
+## 3. Running example ##
 
 ```
 ./TRACESPipeLite.sh --threads 8 --reads1 reads_forward.fq.gz \
 --reads2 reads_forward.fq.gz --database VDB.fa --output test_viral_analysis
 ```
 
-## 3. Usage ##
+## 4. Usage ##
 
 ```
 ./TRACESPipeLite.sh -h
@@ -67,7 +128,7 @@ chmod +x *.sh
  -------------------------------------------------------
 ```
 
-## 4. Citation ##
+## 5. Citation ##
 
 Please cite:
 ```
@@ -77,7 +138,7 @@ GigaScience, 9(8), p.giaa086.
 ```
 [PDF Link](https://doi.org/10.1093/gigascience/giaa086)
 
-## 5. License ##
+## 6. License ##
 
 GPL v3.
 
