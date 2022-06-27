@@ -4,10 +4,11 @@
 [![Speed](https://img.shields.io/static/v1.svg?label=Ultra-Fast&message=Ultra%20speed%20performance&color=green)](#)
 [![Release](https://img.shields.io/static/v1.svg?label=Release&message=v1.0&color=orange)](#)
 
-Lite version of TRACESPipe: ultra-fast reconstruction of viral genomes providing consensus sequences, breadth, depth coverage and profiles, and others. Assembly is reference-based. The viral database is freely provided.
+TRACESPipeLite is the reference-based version of TRACESPipe. It provides ultra-fast reconstruction of viral genomes providing consensus sequences, breadth, depth coverage and profiles, and others. Assembly is exclusively reference-based. The viral database is freely provided.
 
 ## 1. Installation ##
 
+To install TRACESPipeLite, please run
 ```
 git clone https://github.com/viromelab/TRACESPipeLite.git
 cd TRACESPipeLite/src/
@@ -64,7 +65,6 @@ JCV
 MCPyV
 TSPyV
 WUHPyV
-
 ```
 To download, build, and create the PDF with the respective quality controls, for each viruses, there will be the need to create a file as
 ```
@@ -88,6 +88,8 @@ VDB.mfa
 
 ## 3. Running example ##
 
+The TRACESPipeLite package includes viral reads for a quick demonstration.
+To run the example, please, first, install the tool. Then, run the following command
 ```
 ./TRACESPipeLite.sh --threads 8 --reads1 reads_forward.fq.gz \
 --reads2 reads_forward.fq.gz --database VDB.fa --output test_viral_analysis
@@ -95,10 +97,11 @@ VDB.mfa
 
 ## 4. Usage ##
 
+To see the option of TRACESPipeLite, please run the following command
 ```
 ./TRACESPipeLite.sh -h
 ```
-
+This command will output the following content
 ```
  -------------------------------------------------------- 
                                                           
@@ -139,7 +142,7 @@ VDB.mfa
 
 ## 5. Citation ##
 
-Please cite:
+Please, cite:
 ```
 Pratas, D., Toppinen, M., Pyöriä, L., Hedman, K., Sajantila, A. and Perdomo, M.F., 2020. 
 A hybrid pipeline for reconstruction and analysis of viral genomes at multi-organ level.
