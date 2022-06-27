@@ -16,9 +16,11 @@ chmod +x *.sh
 ./TRACESPipeLite.sh --install
 ```
 
-## 2. Database quality check ##
+## 2. Database build and quality check ##
 
-The database quality check can be provided for the following 42 human viruses:
+The high-quality database is fundamental for high accuracy in metagenomic classification. 
+The TRACESPipeLite already includes a database at the src directory.
+Nevertheless, the following procedure includes instruction on how to create and check the quality of a specific database with the following 42 human viruses:
 ```
 B19V
 BufaV
