@@ -18,9 +18,9 @@ chmod +x *.sh
 
 ## 2. Database build and quality check ##
 
-The high-quality database is fundamental for high accuracy in metagenomic classification. 
-The TRACESPipeLite already includes a database at the src directory.
-Nevertheless, the following procedure includes instruction on how to create and check the quality of a specific database with the following 42 human viruses:
+A high-quality database is fundamental for high accuracy in metagenomic classification. 
+TRACESPipeLite already includes a database at the src directory, with the name VDB.fa.lzma.
+Nevertheless, the following procedure includes instructions on how to create and check the quality of a specific database with the following 42 human viruses:
 ```
 B19V
 BufaV
@@ -66,7 +66,7 @@ TSPyV
 WUHPyV
 
 ```
-To create the PDF with the respective quality controls, for each viruses there will be the need to create a file as
+To download, build, and create the PDF with the respective quality controls, for each viruses, there will be the need to create a file as
 ```
 <virus_name>.txt
 ```
@@ -76,8 +76,15 @@ After, there will be the need to run:
 ```
 ./RunDB.sh
 ```
-
-
+The output will be available as
+```
+DB-<virus_name>.mfa
+Composition-<virus_name>.pdf
+```
+and the whole FASTA database as
+```
+VDB.mfa
+```
 
 ## 3. Running example ##
 
