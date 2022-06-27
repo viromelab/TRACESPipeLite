@@ -4,7 +4,7 @@
 [![Speed](https://img.shields.io/static/v1.svg?label=Ultra-Fast&message=Ultra%20speed%20performance&color=green)](#)
 [![Release](https://img.shields.io/static/v1.svg?label=Release&message=v1.0&color=orange)](#)
 
-TRACESPipeLite is the reference-based version of TRACESPipe. It provides ultra-fast reconstruction of viral genomes providing consensus sequences, breadth, depth coverage and profiles, and others. Assembly is exclusively reference-based. The viral database is freely provided.
+TRACESPipeLite is the reference-based version of TRACESPipe. TRACESPipeLite is oriented for human viral genome classification, specifically to apply directly in clinical virology backgrounds. It provides the ultra-fast reconstruction of viral genomes while automatically generating consensus sequences, breadth and depth coverage values and profiles, and others. The viral database is freely provided. Assembly is exclusively reference-based and can be used in the provided database, but not limited.
 
 ## 1. Installation ##
 
@@ -19,7 +19,7 @@ chmod +x *.sh
 
 ## 2. Database build and quality check ##
 
-A high-quality database is fundamental for high accuracy in metagenomic classification. 
+An extensive and high-quality database is fundamental for high accuracy in metagenomic classification. 
 TRACESPipeLite already includes a database at the src directory, with the name VDB.fa.lzma.
 Nevertheless, the following procedure includes instructions on how to create and check the quality of a specific database with the following 42 human viruses:
 ```
