@@ -17,7 +17,7 @@ chmod +x *.sh
 ./TRACESPipeLite.sh --install
 ```
 
-## 2. Database build and quality check ##
+## 2. Database build and quality check (optional) ##
 
 An extensive and high-quality database is fundamental for high accuracy in metagenomic classification. 
 TRACESPipeLite already includes a database at the src directory, with the name VDB.fa.lzma.
