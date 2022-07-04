@@ -88,6 +88,7 @@ PROGRAM_EXISTS () {
 CHECK_PROGRAMS () {
   PROGRAM_EXISTS "AdapterRemoval";
   PROGRAM_EXISTS "gto_fasta_extract_read_by_pattern";
+  PROGRAM_EXISTS "gto_filter";
   PROGRAM_EXISTS "FALCON";
   PROGRAM_EXISTS "bwa";
   PROGRAM_EXISTS "samtools";
@@ -108,44 +109,14 @@ CHECK_PROGRAMS () {
 # HERV IS CURRENTLY BEING ADDRESSED AS HAPLOID IN ALIGNMENTS -> THIS WILL
 # REQUIRE ADAPTATION IN THE FUTURE.
 #
-#declare -a VIRUSES=("B19" "AV" "AAV" "HV1" "HV2" "HV3" "HV4" "HV5" "HV6" "HV6A" 
-#                    "HV6B" "HV7" "HV8" "POLY1" "POLY2" "POLY3" "POLY4" "POLY5" 
-#                    "POLY6" "POLY7" "POLY8" "POLY9" "POLY10" "POLY11" "POLY12" 
-#		     "POLY13" "POLY14" "HAV" "HBV" "HCV" "HDV" "HEV" "HPV" "TTV" 
-#		     "HBOV1" "HBOVNOT1" "VARV" "SV40" "CUTA" "SENV" "EV" "SARS2" 
-#                    "HERV" "MT");
-#
-#
-declare -a VIRUSES=("B19V" "BufaV" "CutaV" "BocaV" "BocaVN1" "AAV"
-
-		    "BKpV" "JCV" "KI" "WUHPyV" "MCPyV" "HPyV6" "HPyV7" "TSPyV" "HPyV9" "HPyV10" "STLPyV" "HPyV12" "NJPyV" "LIPyV" "SV40" 
-		    
-		    "TTV"
-
-		    "HBV"
-		    
-		    "HPV2" "HPV6" "HPV11" "HPV16" "HPV18" "HPV31" "HPV39" "HPV45" "HPV51" "HPV56" "HPV58" "HPV59" "HPV68" "HPV77"
-
-                    "HSV-1" "HSV-2" "VZV" "EBV" "HCMV" "HHV6" "HHV7" "HHV8" 
-
-		    "ReDoV"
-
-		    "VARV"
-
-		    "MPXV"
-
-		    "SENV" 
-		    
-		    "HAV" "HBV" "HCV" "HDV" "HEV"
-		    
-		    "EV" "SARS2" 
-		    
-		    "HERV"
-		    
-		    "MT"
-		    );
-
-
+declare -a VIRUSES=("B19V" "BuV" "CuV" "HBoV" "AAV" "BKPyV" "JCPyV" "KIPyV" 
+                    "WUPyV" "MCPyV" "HPyV6" "HPyV7" "TSPyV" "HPyV9" "MWPyV" 
+		    "STLPyV" "HPyV12" "NJPyV" "LIPyV" "SV40" "TTV" 
+		    "HAV" "HBV" "HCV" "HDV" "HEV" "SENV" "HPV2" "HPV6" "HPV11" 
+		    "HPV16" "HPV18" "HPV31" "HPV39" "HPV45" "HPV51" "HPV56" 
+		    "HPV58" "HPV59" "HPV68" "HPV77" "HSV-1" "HSV-2" "VZV" 
+		    "EBV" "HCMV" "HHV6" "HHV7" "KSHV" "ReDoV" "VARV" "MPXV" 
+		    "EV" "SARS2" "HERV" "MT");
 #
 ################################################################################
 #
@@ -299,7 +270,7 @@ if [[ "$RUN" -eq "1" ]];
   #
   ## RUN VIRAL METAGENOMIC COMPOSITION =========================================
   #
-  FALCON -v -n $THREADS -t 100000 -F -m 6:1:1:0/0 -m 13:50:1:0/0 -m 19:500:1:5/10 -g 0.85 -c 10 -x top-metagenomics.csv reads-tracespipe-run-tmp.fq $DATABASE
+  FALCON -v -n $THREADS -t 10000 -F -m 6:1:1:0/0 -m 13:50:1:0/0 -m 19:500:1:5/10 -g 0.85 -c 10 -x top-metagenomics.csv reads-tracespipe-run-tmp.fq $DATABASE
   cp top-metagenomics.csv $OUTPUT/
   #
   ## GET HIGHEST SIMILAR REFERENCE =============================================
@@ -308,31 +279,42 @@ if [[ "$RUN" -eq "1" ]];
   for VIRUS in "${VIRUSES[@]}"
     do
     printf "%s\t" "$VIRUS" >> best-viral-metagenomics.txt;
-    ./get_best_src/TRACES_get_best_$VIRUS.sh >> best-viral-metagenomics.txt
+    #
+    RESULT=`cat top-metagenomics.csv | grep -a -f IDS/ID-$VIRUS.ids \
+    | awk '{ if($3 > 0 && $2 > 200 && $2 < 9000000) print $3"\t"$4; }' \
+    | head -n 1 \
+    | awk '{ print $1"\t"$2;}' \
+    | sed "s/NC\_/NC-/" \
+    | tr '_' '\t' \
+    | awk '{ print $1"\t"$2;}'`;
+    if [ -z "$RESULT" ]
+      then
+      echo -e "-\t-" >> best-viral-metagenomics.txt
+      else
+      echo "$RESULT" | sed "s/NC-/NC\_/" >> best-viral-metagenomics.txt
+      fi
+    #
     done
   cp best-viral-metagenomics.txt $OUTPUT/
-  cat best-viral-metagenomics.txt;
   #
   ## ALIGN READS TO EACH HIGHEST SIMILAR REFERENCE =============================
   #
   printf "NAME\tGID\tSIZE\tSIMILARITY\tBREADTH\tDEPTH\n" > $OUTPUT/final-results.txt;
   #
-  mapfile -t BEST_V_DATA < best-viral-metagenomics.txt
-  for vline in "${BEST_V_DATA[@]}" #
+  mapfile -t BEST_V_DATA < best-viral-metagenomics.txt;
+  for vline in "${BEST_V_DATA[@]}"
     do
     #
-    V_NAME=`echo $vline | awk '{ print $1 }'`;
-    SIMILARITY=`echo $vline | awk '{ print $2*1 }'`;
-    SIM_CORR=`printf "%.4f" "$SIMILARITY"`;
-    GID=`echo $vline | awk '{ print $3 }'`;
+    V_NAME=`echo $vline | awk -F '\t| ' '{ print $1 }'`;
+    SIMILARITY=`echo $vline | awk -F '\t| ' '{ print $2 }'`;
+    GID=`echo $vline | awk -F '\t| ' '{ print $3 }'`;
     #
     echo -e "\e[34m[TRACESPipeLite]\e[32m Processing $V_NAME ...\e[0m";
     #
-    echo "ORGANISM: $vline";
+    echo "ORGANISM: $V_NAME";
     echo "SIMILARITY: $SIMILARITY"
-    echo "SIM_CORR: $SIM_CORR"
     if [[ "$SIMILARITY" != "-" ]]; then
-      if (($(echo "$SIM_CORR > $MIN_SIMILARITY" |bc -l))); then
+      if (( $(bc <<<"$SIMILARITY > $MIN_SIMILARITY") )); then 
       #
       echo -e "\e[34m[TRACESPipeLite]\e[32m Minimum similarity reach in $V_NAME ...\e[0m";
       #
@@ -387,8 +369,8 @@ if [[ "$RUN" -eq "1" ]];
       BREADTH=`echo "scale=4; (100-(($ZERO_COVERAGE/$TOTAL_SIZE)*100))" | bc -l`;
       #
       rm -f x.projected.profile;
-      ./get_best_src/TRACES_project_coordinates.sh $OUTPUT/$V_NAME/$V_NAME-coverage.bed $COVERAGE_MAX | gto_filter -w $COVERAGE_WINDOW_SIZE -d $COVERAGE_DROP > x.projected.profile;
-      DEPTH=`./get_best_src/TRACES_project_coordinates.sh $OUTPUT/$V_NAME/$V_NAME-coverage.bed $COVERAGE_MAX | awk '{sum+=$2} END { print sum/NR}'`;
+      ./TRACES_project_coordinates.sh $OUTPUT/$V_NAME/$V_NAME-coverage.bed $COVERAGE_MAX | gto_filter -w $COVERAGE_WINDOW_SIZE -d $COVERAGE_DROP > x.projected.profile;
+      DEPTH=`./TRACES_project_coordinates.sh $OUTPUT/$V_NAME/$V_NAME-coverage.bed $COVERAGE_MAX | awk '{sum+=$2} END { print sum/NR}'`;
       #
       printf "$V_NAME\t$GID\t$TOTAL_SIZE\t$SIM_CORR\t$BREADTH\t$DEPTH\n" >> $OUTPUT/final-results.txt;
       #
