@@ -108,12 +108,44 @@ CHECK_PROGRAMS () {
 # HERV IS CURRENTLY BEING ADDRESSED AS HAPLOID IN ALIGNMENTS -> THIS WILL
 # REQUIRE ADAPTATION IN THE FUTURE.
 #
-declare -a VIRUSES=("B19" "AV" "AAV" "HV1" "HV2" "HV3" "HV4" "HV5" "HV6" "HV6A" 
-                    "HV6B" "HV7" "HV8" "POLY1" "POLY2" "POLY3" "POLY4" "POLY5" 
-		    "POLY6" "POLY7" "POLY8" "POLY9" "POLY10" "POLY11" "POLY12" 
-		    "POLY13" "POLY14" "HAV" "HBV" "HCV" "HDV" "HEV" "HPV" "TTV" 
-		    "HBOV1" "HBOVNOT1" "VARV" "SV40" "CUTA" "SENV" "EV" "SARS2" 
-		    "HERV" "MT");
+#declare -a VIRUSES=("B19" "AV" "AAV" "HV1" "HV2" "HV3" "HV4" "HV5" "HV6" "HV6A" 
+#                    "HV6B" "HV7" "HV8" "POLY1" "POLY2" "POLY3" "POLY4" "POLY5" 
+#                    "POLY6" "POLY7" "POLY8" "POLY9" "POLY10" "POLY11" "POLY12" 
+#		     "POLY13" "POLY14" "HAV" "HBV" "HCV" "HDV" "HEV" "HPV" "TTV" 
+#		     "HBOV1" "HBOVNOT1" "VARV" "SV40" "CUTA" "SENV" "EV" "SARS2" 
+#                    "HERV" "MT");
+#
+#
+declare -a VIRUSES=("B19V" "BufaV" "CutaV" "BocaV" "BocaVN1" "AAV"
+
+		    "BKpV" "JCV" "KI" "WUHPyV" "MCPyV" "HPyV6" "HPyV7" "TSPyV" "HPyV9" "HPyV10" "STLPyV" "HPyV12" "NJPyV" "LIPyV" "SV40" 
+		    
+		    "TTV"
+
+		    "HBV"
+		    
+		    "HPV2" "HPV6" "HPV11" "HPV16" "HPV18" "HPV31" "HPV39" "HPV45" "HPV51" "HPV56" "HPV58" "HPV59" "HPV68" "HPV77"
+
+                    "HSV-1" "HSV-2" "VZV" "EBV" "HCMV" "HHV6" "HHV7" "HHV8" 
+
+		    "ReDoV"
+
+		    "VARV"
+
+		    "MPXV"
+
+		    "SENV" 
+		    
+		    "HAV" "HBV" "HCV" "HDV" "HEV"
+		    
+		    "EV" "SARS2" 
+		    
+		    "HERV"
+		    
+		    "MT"
+		    );
+
+
 #
 ################################################################################
 #
