@@ -21,7 +21,7 @@ chmod +x *.sh
 
 An extensive and high-quality database is fundamental for high accuracy in metagenomic classification. 
 TRACESPipeLite already includes a database at the src directory, with the name VDB.fa.lzma.
-Nevertheless, the following procedure includes instructions on how to create and check the quality of a specific database with the following 56 human viruses and Human mitogenome:
+Nevertheless, the following procedure includes instructions on how to create and check the quality of a specific database with the following 56 viruses and Human mitogenome:
 ```
 B19V		Human Parvovirus
 BuV 		Bufa virus
