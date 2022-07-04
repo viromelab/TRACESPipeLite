@@ -21,15 +21,13 @@ chmod +x *.sh
 
 An extensive and high-quality database is fundamental for high accuracy in metagenomic classification. 
 TRACESPipeLite already includes a database at the src directory, with the name VDB.fa.lzma.
-Nevertheless, the following procedure includes instructions on how to create and check the quality of a specific database with the following 56 viruses and Human mitogenome:
+Nevertheless, the following procedure includes instructions on how to create and check the quality of a specific database with the following 55 viruses and Human mitogenome:
 ```
 B19V		Human Parvovirus
 BuV 		Bufa virus
 CuV 		Cuta virus
 HBoV 		Boca virus type 1
-HBoVN1 		Boca virus not type 1
 AAV		Adeno-Associated Virus
-
 BKPyV	 	Human polyomavirus 1
 JCPyV 		Human polyomavirus 2
 KIPyV 		Human polyomavirus 3
@@ -45,16 +43,13 @@ HPyV12 		Human polyomavirus 12
 NJPyV	 	Human polyomavirus 13
 LIPyV	 	Human polyomavirus 14
 SV40		Simian virus 40
-
 TTV		Torque Teno Virus
-
 HAV 		Hepatitis A Virus
 HBV 		Hepatitis B Virus
 HCV 		Hepatitis C Virus
 HDV 		Hepatitis D Virus
 HEV		Hepatitis E Virus
 SENV    	SEN virus
-
 HPV2		Human papillomavirus 2
 HPV6	 	Human papillomavirus 6
 HPV11 		Human papillomavirus 11
@@ -69,7 +64,6 @@ HPV58 		Human papillomavirus 58
 HPV59 		Human papillomavirus 59
 HPV68 		Human papillomavirus 68
 HPV77		Human papillomavirus 77
-
 HSV-1	 	Herpes-Simplex Virus 1
 HSV-2 		Herpes-Simplex Virus 2
 VZV 		Varicela-Zoster Virus
@@ -78,14 +72,12 @@ HCMV	 	Human Cytomegalovirus
 HHV6		Human Herpesvirus 6
 HHV7 		Human Herpesvirus 7
 KSHV		Kaposi's Sarcoma-associated Herpesvirus
-
 ReDoV	 	Redondovirus
 VARV 		Variola Virus
 MPXV		Monkeypox Virus
 EV		Enterovirus 
 SARS2		SARS-CoV-2
 HERV 		Human Endogenous Retrovirus
-                    
 MT   	        Human Mitogenome
 ```
 To download, build, and create the PDF with the respective quality controls, for each viruses, there will be the need to create a file as
