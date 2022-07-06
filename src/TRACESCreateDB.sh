@@ -19,7 +19,7 @@ function BUILD_FASTA {
     ID=`echo $VID | awk '{ print $1 }'`;
     echo "==== Download $ID ...";
     echo "Download $ID ..." 1>> report-$1.txt
-    efetch -db nucleotide -format fasta -id "$ID" >> ../DB-$1.mfa 2>> report-$1.txt
+    efetch -db nucleotide -format fasta -id "$ID" >> DB-$1.mfa 2>> report-$1.txt
     done
   }
 #
