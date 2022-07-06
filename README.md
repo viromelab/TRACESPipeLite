@@ -80,7 +80,7 @@ SARS2		SARS-CoV-2
 HERV 		Human Endogenous Retrovirus
 MT   	        Human Mitogenome
 ```
-To download, build, and create the PDF with the respective quality controls, for each virus, there will be the need to create a file in IDS/ as
+To download and build the database, and create the PDF with the respective quality controls, for each virus, there will be the need to create a file in IDS/ folder as
 ```
 ID-<virus_name>.ids
 ```
@@ -97,7 +97,7 @@ The output will be available as
 FIL-DB-<virus_name>.mfa
 Composition-<virus_name>.pdf
 ```
-and the whole FASTA database as
+The composition virus PDF will provide information if a genome contains unusual characteristics (higher or lower number of bases, external chars, or different GC content). The whole FASTA database will be available as
 ```
 VDB.mfa
 ```
