@@ -80,24 +80,30 @@ SARS2		SARS-CoV-2
 HERV 		Human Endogenous Retrovirus
 MT   	        Human Mitogenome
 ```
-To download, build, and create the PDF with the respective quality controls, for each viruses, there will be the need to create a file as
+To download, build, and create the PDF with the respective quality controls, for each virus, there will be the need to create a file in IDS/ as
 ```
-<virus_name>.txt
+ID-<virus_name>.ids
 ```
 containing the IDs (one for each line) for the respective virus type.
 
 After, there will be the need to run:
 ```
-./RunDB.sh
+./TRACESCreateDB.sh
+./TRACESAnalyzeDB.sh
+./TRACESMergeDB.sh
 ```
 The output will be available as
 ```
-DB-<virus_name>.mfa
+FIL-DB-<virus_name>.mfa
 Composition-<virus_name>.pdf
 ```
 and the whole FASTA database as
 ```
 VDB.mfa
+```
+Finally, to set this viral database as default, type:
+```
+mv VDB.mfa VDB.fa
 ```
 
 ## 3. Running example ##

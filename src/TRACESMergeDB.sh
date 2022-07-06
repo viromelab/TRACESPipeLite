@@ -15,8 +15,13 @@ rm -f VDB.mfa;
 for VIRUS in "${VIRUSES[@]}"
   do
   #
-  echo "Creating $VIRUS ...";
-  gto_fasta_rand_extra_chars < FIL-DB-$VIRUS.mfa >> VDB.mfa 
+  echo "Merging $VIRUS ...";
+  if [ -s "FIL-DB-$VIRUS.mfa" ];
+    then 
+    gto_fasta_rand_extra_chars < FIL-DB-$VIRUS.mfa >> VDB.mfa 
+    else
+    echo "WARNING: FIL-DB-$VIRUS.mfa is empty!";
+    fi
   #
   done
 #
