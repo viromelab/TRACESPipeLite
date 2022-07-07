@@ -320,7 +320,7 @@ if [[ "$RUN" -eq "1" ]];
       #
       mkdir -p $OUTPUT/$V_NAME/;
       #
-      gto_fasta_extract_read_by_pattern -p "$GID" < VDB.fa | awk '/^>/{if(N)exit;++N;} {print;}' > $V_NAME.fa;
+      gto_fasta_extract_read_by_pattern -p "$GID" < $DATABASE | awk '/^>/{if(N)exit;++N;} {print;}' > $V_NAME.fa;
       #
       bwa index $V_NAME.fa
       bwa aln -l 1000 -n 0.01 $V_NAME.fa reads-tracespipe-run-tmp.fq > $V_NAME-READS.sai
