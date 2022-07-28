@@ -5,7 +5,7 @@ INSTALL="0";
 THREADS="8";
 READS1="";
 READS2="";
-DATABASE="VDB.fa";
+DATABASE="VDB.mfa";
 OUTPUT="out_analysis";
 MIN_SIMILARITY="3.0";
 MAX_COVERAGE_PROFILE=0;
@@ -49,7 +49,7 @@ SHOW_MENU () {
   echo " Example -----------------------------------------------  ";
   echo "                                                          ";
   echo " TRACESPipeLite.sh --reads1 reads_forward.fq.gz \\        ";
-  echo "   --reads2 reads_reverse.fq.gz --database VDB.fa \\      ";
+  echo "   --reads2 reads_reverse.fq.gz --database VDB.mfa \\     ";
   echo "   --output lite_viral_analysis --threads 8               ";
   echo "                                                          ";
   echo " -------------------------------------------------------  ";
@@ -372,7 +372,7 @@ if [[ "$RUN" -eq "1" ]];
       ./TRACES_project_coordinates.sh $OUTPUT/$V_NAME/$V_NAME-coverage.bed $COVERAGE_MAX | gto_filter -w $COVERAGE_WINDOW_SIZE -d $COVERAGE_DROP > x.projected.profile;
       DEPTH=`./TRACES_project_coordinates.sh $OUTPUT/$V_NAME/$V_NAME-coverage.bed $COVERAGE_MAX | awk '{sum+=$2} END { print sum/NR}'`;
       #
-      printf "$V_NAME\t$GID\t$TOTAL_SIZE\t$SIM_CORR\t$BREADTH\t$DEPTH\n" >> $OUTPUT/final-results.txt;
+      printf "$V_NAME\t$GID\t$TOTAL_SIZE\t$SIMILARITY\t$BREADTH\t$DEPTH\n" >> $OUTPUT/final-results.txt;
       #
       if [[ "$COVERAGE_LOG_SCALE" -eq "" ]];
         then
