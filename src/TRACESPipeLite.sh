@@ -23,7 +23,7 @@ SPECIFIC_ONLY="0";
 SHOW_MENU () {
   echo " -------------------------------------------------------- ";
   echo "                                                          ";
-  echo " TRACESPipeLite.sh : TRACESPipe lite version v1.0         ";
+  echo " TRACESPipeLite.sh : TRACESPipe lite version v2.1         ";
   echo "                                                          ";
   echo " This is a lite version of TRACESPipe. It provides        ";
   echo " automatic reconstruction (reference-based only) of       ";
