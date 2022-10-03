@@ -2,7 +2,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](LICENSE)
 [![Speed](https://img.shields.io/static/v1.svg?label=Ultra-Fast&message=Ultra%20speed%20performance&color=green)](#)
-[![Release](https://img.shields.io/static/v1.svg?label=Release&message=v1.0&color=orange)](#)
+[![Release](https://img.shields.io/static/v1.svg?label=Release&message=v2.1&color=orange)](#)
 
 TRACESPipeLite is the reference-based version of TRACESPipe. TRACESPipeLite is oriented for human viral genome classification, specifically to apply directly in clinical virology backgrounds. It provides the ultra-fast reconstruction of viral genomes while automatically generating consensus sequences, breadth and depth coverage values and profiles, and others. The viral database is freely provided. Assembly is exclusively reference-based and can be used in the provided database, but not limited.
 
