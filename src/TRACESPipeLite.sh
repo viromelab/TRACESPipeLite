@@ -14,6 +14,9 @@ COVERAGE_MAX="1000";
 COVERAGE_LOG_SCALE="";
 COVERAGE_WINDOW_SIZE="5";
 COVERAGE_DROP="1";
+SPECIFIC="";
+SPECIFIC_ON="0";
+SPECIFIC_ONLY="0";
 #
 ################################################################################
 #
@@ -38,6 +41,9 @@ SHOW_MENU () {
   echo " -ma <INT>, --maximum <INT>     Coverage maximum (crop),  ";
   echo " -si <INT>, --similarity <DBL>  Minimum similarity for    ";
   echo "                                applying reconstruction,  ";
+  echo " -s  <STR>, --specific <STR>    Use specific sequence,    ";
+  echo " -os,       --only-specific     Run only specific,        ";
+  echo "                                                          ";
   echo " -t  <INT>, --threads <INT>     Number of threads,        ";
   echo " -o  <STR>, --output <STR>      Output folder name,       ";
   echo "                                                          ";
@@ -191,6 +197,15 @@ while [[ $# -gt 0 ]]
       OUTPUT="$2";
       shift 2;
     ;;
+    -s|--specific)
+      SPECIFIC_ON="1";
+      SPECIFIC="$2";
+      shift 2;
+    ;;
+    -os|--only-specific)
+      SPECIFIC_ONLY="1";
+      shift
+    ;;
     -*) # unknown option with small
     echo "Invalid arg ($1)!";
     echo "For help, try: TRACESPipeLite.sh -h"
@@ -241,16 +256,13 @@ if [[ "$INSTALL" -eq "1" ]];
 #
 ################################################################################
 #
-if [[ "$RUN" -eq "1" ]];
+if [[ "$SPECIFIC_ON" -eq "1" || "$RUN" -eq "1" ]]
   then
-  #
   CHECK_INPUT $READS1
   CHECK_INPUT adapters_ar.fa
-  CHECK_INPUT $DATABASE
   CHECK_PROGRAMS
   #
   rm reads-tracespipe-run-tmp.fq $OUTPUT/ -fr
-  #
   mkdir -p $OUTPUT/
   #
   ## RUN TRIMMING ==============================================================
@@ -267,6 +279,161 @@ if [[ "$RUN" -eq "1" ]];
     fi
   #
   rm -f AXTRL.*;
+  #
+  printf "NAME\tGID\tSIZE\tSIMILARITY\tBREADTH\tDEPTH\n" > $OUTPUT/final-results.txt;
+  #
+  fi
+#
+# ------------------------------------------------------------------------------
+#
+if [[ "$SPECIFIC_ON" -eq "1" ]];
+  then
+  #
+  CHECK_INPUT $SPECIFIC
+  #
+  echo -e "\e[34m[TRACESPipeLite]\e[32m Processing specific $SPECIFIC ...\e[0m";
+  #
+  mkdir -p $OUTPUT/SPECIFIC_$SPECIFIC/;
+  #
+  rm -f SPECIFIC.fa*
+  #
+  cp $SPECIFIC SPECIFIC.fa
+  #
+  bwa index SPECIFIC.fa
+  bwa aln -l 1000 -n 0.01 SPECIFIC.fa reads-tracespipe-run-tmp.fq > SPECIFIC-READS.sai
+  bwa samse SPECIFIC.fa SPECIFIC-READS.sai reads-tracespipe-run-tmp.fq > SPECIFIC-READS.sam
+  samtools view -bSh SPECIFIC-READS.sam > SPECIFIC-READS.bam;
+  samtools view -bh -F4 SPECIFIC-READS.bam > FIL-SPECIFIC-READS.bam;
+  samtools sort -o SORT-FIL-SPECIFIC-READS.bam FIL-SPECIFIC-READS.bam;
+  samtools rmdup -s SORT-FIL-SPECIFIC-READS.bam RD-SORT-FIL-SPECIFIC-READS.bam;
+  samtools index -b RD-SORT-FIL-SPECIFIC-READS.bam RD-SORT-FIL-SPECIFIC-READS.bam.bai
+  #
+  bedtools genomecov -ibam RD-SORT-FIL-SPECIFIC-READS.bam -bga > SPECIFIC-coverage.bed
+  awk '$4 < 1' SPECIFIC-coverage.bed > SPECIFIC-zero-coverage.bed
+  samtools faidx SPECIFIC.fa
+  samtools mpileup -Ou -f SPECIFIC.fa RD-SORT-FIL-SPECIFIC-READS.bam \
+  | bcftools call --ploidy 1 -P 9.9e-1 -mv -Oz -o SPECIFIC-calls.vcf.gz
+  bcftools index SPECIFIC-calls.vcf.gz
+  bcftools norm -f SPECIFIC.fa SPECIFIC-calls.vcf.gz -Oz -o SPECIFIC-calls.norm.vcf.gz
+  bcftools filter --IndelGap 5 SPECIFIC-calls.norm.vcf.gz -Oz -o SPECIFIC-calls.norm.flt-indels.vcf.gz
+  zcat SPECIFIC-calls.norm.flt-indels.vcf.gz | vcf2bed --snvs > SPECIFIC-calls.bed
+  tabix -f SPECIFIC-calls.norm.flt-indels.vcf.gz
+  bcftools consensus -m SPECIFIC-zero-coverage.bed -f SPECIFIC.fa SPECIFIC-calls.norm.flt-indels.vcf.gz > SPECIFIC-consensus.fa
+  tail -n +2 SPECIFIC-consensus.fa > SPECIFIC-TMP_FILE.xki
+  echo ">SPECIFIC consensus (REF: $SPECIFIC) [TRACESPipeLite]" > SPECIFIC-consensus.fa
+  cat SPECIFIC-TMP_FILE.xki >> SPECIFIC-consensus.fa
+  rm -f SPECIFIC-TMP_FILE.xki;
+  #
+  cp SPECIFIC-consensus.fa $OUTPUT/SPECIFIC_$SPECIFIC/
+  cp SPECIFIC-zero-coverage.bed $OUTPUT/SPECIFIC_$SPECIFIC/
+  cp SPECIFIC-coverage.bed $OUTPUT/SPECIFIC_$SPECIFIC/
+  cp SPECIFIC-calls.bed $OUTPUT/SPECIFIC_$SPECIFIC/
+  cp SPECIFIC-calls.vcf.gz $OUTPUT/SPECIFIC_$SPECIFIC/
+  #
+  cp RD-SORT-FIL-SPECIFIC-READS.bam $OUTPUT/SPECIFIC_$SPECIFIC/
+  cp RD-SORT-FIL-SPECIFIC-READS.bam.bai $OUTPUT/SPECIFIC_$SPECIFIC/
+  cp SPECIFIC.fa $OUTPUT/SPECIFIC_$SPECIFIC/
+  #
+  COVERAGE_NAME="coverage-SPECIFIC.pdf";
+  CHECK_INPUT "$OUTPUT/SPECIFIC_$SPECIFIC/SPECIFIC-coverage.bed";
+  #
+  TOTAL_SIZE=`tail -n 1 $OUTPUT/SPECIFIC_$SPECIFIC/SPECIFIC-coverage.bed | awk '{ print $3}'`;
+  ZERO_COVERAGE=`awk '{sum += ($3-$2)} END {print sum}' $OUTPUT/SPECIFIC_$SPECIFIC/SPECIFIC-zero-coverage.bed`;
+  if [ -z $ZERO_COVERAGE ]
+    then
+    ZERO_COVERAGE=0;
+    fi
+  BREADTH=`echo "scale=4; (100-(($ZERO_COVERAGE/$TOTAL_SIZE)*100))" | bc -l`;
+  #
+  rm -f x.projected.profile;
+  ./TRACES_project_coordinates.sh $OUTPUT/SPECIFIC_$SPECIFIC/SPECIFIC-coverage.bed $COVERAGE_MAX | gto_filter -w $COVERAGE_WINDOW_SIZE -d $COVERAGE_DROP > x.projected.profile;
+  DEPTH=`./TRACES_project_coordinates.sh $OUTPUT/SPECIFIC_$SPECIFIC/SPECIFIC-coverage.bed $COVERAGE_MAX | awk '{sum+=$2} END { print sum/NR}'`;
+  #
+  printf "SPECIFIC\t$GID\t$TOTAL_SIZE\t$SIMILARITY\t$BREADTH\t$DEPTH\n" >> $OUTPUT/final-results.txt;
+  #
+  if [[ "$COVERAGE_LOG_SCALE" -eq "" ]];
+    then
+    gnuplot << EOF
+    reset
+    set terminal pdfcairo enhanced color font 'Verdana,12'
+    set output "$COVERAGE_NAME"
+    set style line 101 lc rgb '#000000' lt 1 lw 4
+    set border 3 front ls 101
+    set tics nomirror out scale 0.75
+    set format '%g'
+    set size ratio 0.2
+    set key outside horiz center top
+    set yrange [$COVERAGE_MIN_X:]
+    set xrange [:]
+    set xtics auto
+    set grid
+    set ylabel "Depth"
+    set xlabel "Position"
+    set border linewidth 1.5
+    set style line 1 lc rgb '#0060ad' lt 1 lw 2 pt 5 ps 0.4 # --- blue
+    set style line 2 lc rgb '#000000' lt 1 lw 2 pt 6 ps 0.4 # --- green
+    set style line 3 lc rgb '#dd181f' lt 1 lw 4 pt 7 ps 0.4 # --- ?
+    set style line 4 lc rgb '#4d1811' lt 1 lw 4 pt 8 ps 0.4 # --- ?
+    set style line 5 lc rgb '#1d121f' lt 1 lw 4 pt 9 ps 0.4 # --- ?
+    plot "x.projected.profile" using 1:2 t "Depth coverage" with lines ls 2
+EOF
+    else
+    gnuplot << EOF
+    reset
+    set terminal pdfcairo enhanced color font 'Verdana,12'
+    set output "$COVERAGE_NAME"
+    set style line 101 lc rgb '#000000' lt 1 lw 4
+    set border 3 front ls 101
+    set tics nomirror out scale 0.75
+    set format '%g'
+    set size ratio 0.2
+    set key outside horiz center top
+    set yrange [$COVERAGE_MIN_X:]
+    set xrange [:]
+    set xtics auto
+    set logscale y $COVERAGE_LOG_SCALE
+    set grid
+    set ylabel "Depth"
+    set xlabel "Position"
+    set border linewidth 1.5
+    set style line 1 lc rgb '#0060ad' lt 1 lw 2 pt 5 ps 0.4 # --- blue
+    set style line 2 lc rgb '#000000' lt 1 lw 2 pt 6 ps 0.4 # --- green
+    set style line 3 lc rgb '#dd181f' lt 1 lw 4 pt 7 ps 0.4 # --- ?
+    set style line 4 lc rgb '#4d1811' lt 1 lw 4 pt 8 ps 0.4 # --- ?
+    set style line 5 lc rgb '#1d121f' lt 1 lw 4 pt 9 ps 0.4 # --- ?
+    plot "x.projected.profile" using 1:2 t "Depth coverage" with lines ls 2
+EOF
+    fi
+  #
+  cp coverage-SPECIFIC.pdf $OUTPUT/SPECIFIC_$SPECIFIC/
+  rm -f coverage-SPECIFIC.pdf x.projected.profile;
+  #
+  rm -f SPECIFIC-consensus.fa SPECIFIC-zero-coverage.bed SPECIFIC-coverage.bed \
+  SPECIFIC-calls.bed SPECIFIC-calls.vcf.gz SPECIFIC-calls.norm.flt-indels.vcf.gz \
+  SPECIFIC-calls.norm.flt-indels.vcf.gz.tbi SPECIFIC-calls.norm.vcf.gz \
+  SPECIFIC-calls.vcf.gz.csi;
+  #
+  rm -f SPECIFIC-READS.sai SPECIFIC-READS.sam SPECIFIC-READS.bam \
+  FIL-SPECIFIC-READS.bam SORT-FIL-SPECIFIC-READS.bam \
+  SORT-FIL-SPECIFIC-READS.bam.bai SPECIFIC.fa RD-SORT-FIL-SPECIFIC-READS.bam \
+  RD-SORT-FIL-SPECIFIC-READS.bam.bai SPECIFIC.fa.amb SPECIFIC.fa.ann \
+  SPECIFIC.fa.bwt SPECIFIC.fa.fai SPECIFIC.fa.pac SPECIFIC.fa.sa;
+  #
+fi
+#
+################################################################################
+#
+if [[ "$SPECIFIC_ONLY" -eq "1" ]];
+  then
+  RUN="0";
+  fi
+#
+################################################################################
+#
+if [[ "$RUN" -eq "1" ]];
+  then
+  #
+  CHECK_INPUT $DATABASE
   #
   ## RUN VIRAL METAGENOMIC COMPOSITION =========================================
   #
@@ -298,8 +465,6 @@ if [[ "$RUN" -eq "1" ]];
   cp best-viral-metagenomics.txt $OUTPUT/
   #
   ## ALIGN READS TO EACH HIGHEST SIMILAR REFERENCE =============================
-  #
-  printf "NAME\tGID\tSIZE\tSIMILARITY\tBREADTH\tDEPTH\n" > $OUTPUT/final-results.txt;
   #
   mapfile -t BEST_V_DATA < best-viral-metagenomics.txt;
   for vline in "${BEST_V_DATA[@]}"
