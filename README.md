@@ -117,6 +117,12 @@ To run the example, please, first, install the tool. Then, run the following com
 --reads2 reads_forward.fq.gz --database VDB.fa --output test_viral_analysis
 ```
 
+Also, it includes a simple simulation and benchmark
+```
+bash Simple.sh
+./TRACESPipeLite.sh --specific SYN.fa --database VDB.mfa --reads1 blood1.fq --reads2 blood2.fq --threads 8 --output Simple-test-src
+```
+
 ## 4. Usage ##
 
 To see the option of TRACESPipeLite, please run the following command
@@ -127,7 +133,7 @@ This command will output the following content
 ```
  -------------------------------------------------------- 
                                                           
- TRACESPipeLite.sh : TRACESPipe lite version v1.0         
+ TRACESPipeLite.sh : TRACESPipe lite version v2.1         
                                                           
  This is a lite version of TRACESPipe. It provides        
  automatic reconstruction (reference-based only) of       
@@ -145,6 +151,9 @@ This command will output the following content
  -ma <INT>, --maximum <INT>     Coverage maximum (crop),  
  -si <INT>, --similarity <DBL>  Minimum similarity for    
                                 applying reconstruction,  
+ -s  <STR>, --specific <STR>    Use specific sequence,    
+ -os,       --only-specific     Run only specific,        
+                                                          
  -t  <INT>, --threads <INT>     Number of threads,        
  -o  <STR>, --output <STR>      Output folder name,       
                                                           
@@ -156,7 +165,7 @@ This command will output the following content
  Example -----------------------------------------------  
                                                           
  TRACESPipeLite.sh --reads1 reads_forward.fq.gz \        
-   --reads2 reads_reverse.fq.gz --database VDB.fa \      
+   --reads2 reads_reverse.fq.gz --database VDB.mfa \     
    --output lite_viral_analysis --threads 8               
                                                           
  -------------------------------------------------------
