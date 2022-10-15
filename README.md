@@ -171,7 +171,14 @@ This command will output the following content
  -------------------------------------------------------
 ```
 
-## 5. Citation ##
+## 5. Future updates ##
+
+Inclusion of the following viruses:
+```
+MEV	Measles morbillivirus
+```
+
+## 6. Citation ##
 
 Please, cite:
 ```
@@ -181,12 +188,10 @@ GigaScience, 9(8), p.giaa086.
 ```
 [PDF Link](https://doi.org/10.1093/gigascience/giaa086)
 
-## 6. License ##
+## 7. License ##
 
 GPL v3.
 
 For more information see LICENSE file or visit
 <pre>http://www.gnu.org/licenses/gpl-3.0.html</pre>
-
-
 
