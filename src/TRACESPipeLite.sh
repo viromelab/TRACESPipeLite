@@ -3,6 +3,7 @@
 RUN="0";
 INSTALL="0";
 THREADS="8";
+PLOTS="0";
 READS1="";
 READS2="";
 DATABASE="VDB.mfa";
@@ -34,6 +35,7 @@ SHOW_MENU () {
   echo " -h, --help                     Show this,                ";
   echo " -i, --install                  Installation (w/ conda),  ";
   echo "                                                          ";
+  echo " -np,       --no-plots          NO coverage plots,        ";
   echo " -lg <INT>, --log-scale <INT>   Coverage log scale,       ";
   echo " -ws <INT>, --window <INT>      Coverage window size,     ";
   echo " -dr <INT>, --drop <INT>        Coverage drop size,       ";
@@ -143,6 +145,10 @@ while [[ $# -gt 0 ]]
     ;;
     -c|--install|--compile)
       INSTALL=1;
+      shift
+    ;;
+    -np|--no-plots)
+      PLOTS=1;
       shift
     ;;
     -t|--threads)
@@ -334,79 +340,82 @@ if [[ "$SPECIFIC_ON" -eq "1" ]];
   cp RD-SORT-FIL-SPECIFIC-READS.bam.bai $OUTPUT/SPECIFIC_$SPECIFIC/
   cp SPECIFIC.fa $OUTPUT/SPECIFIC_$SPECIFIC/
   #
-  COVERAGE_NAME="coverage-SPECIFIC.pdf";
-  CHECK_INPUT "$OUTPUT/SPECIFIC_$SPECIFIC/SPECIFIC-coverage.bed";
-  #
-  TOTAL_SIZE=`tail -n 1 $OUTPUT/SPECIFIC_$SPECIFIC/SPECIFIC-coverage.bed | awk '{ print $3}'`;
-  ZERO_COVERAGE=`awk '{sum += ($3-$2)} END {print sum}' $OUTPUT/SPECIFIC_$SPECIFIC/SPECIFIC-zero-coverage.bed`;
-  if [ -z $ZERO_COVERAGE ]
+  if [[ "$PLOTS" -eq "0" ]];
     then
-    ZERO_COVERAGE=0;
-    fi
-  BREADTH=`echo "scale=4; (100-(($ZERO_COVERAGE/$TOTAL_SIZE)*100))" | bc -l`;
-  #
-  rm -f x.projected.profile;
-  ./TRACES_project_coordinates.sh $OUTPUT/SPECIFIC_$SPECIFIC/SPECIFIC-coverage.bed $COVERAGE_MAX | gto_filter -w $COVERAGE_WINDOW_SIZE -d $COVERAGE_DROP > x.projected.profile;
-  DEPTH=`./TRACES_project_coordinates.sh $OUTPUT/SPECIFIC_$SPECIFIC/SPECIFIC-coverage.bed $COVERAGE_MAX | awk '{sum+=$2} END { print sum/NR}'`;
-  #
-  printf "SPECIFIC\t$GID\t$TOTAL_SIZE\t$SIMILARITY\t$BREADTH\t$DEPTH\n" >> $OUTPUT/final-results.txt;
-  #
-  if [[ "$COVERAGE_LOG_SCALE" -eq "" ]];
-    then
-    gnuplot << EOF
-    reset
-    set terminal pdfcairo enhanced color font 'Verdana,12'
-    set output "$COVERAGE_NAME"
-    set style line 101 lc rgb '#000000' lt 1 lw 4
-    set border 3 front ls 101
-    set tics nomirror out scale 0.75
-    set format '%g'
-    set size ratio 0.2
-    set key outside horiz center top
-    set yrange [$COVERAGE_MIN_X:]
-    set xrange [:]
-    set xtics auto
-    set grid
-    set ylabel "Depth"
-    set xlabel "Position"
-    set border linewidth 1.5
-    set style line 1 lc rgb '#0060ad' lt 1 lw 2 pt 5 ps 0.4 # --- blue
-    set style line 2 lc rgb '#000000' lt 1 lw 2 pt 6 ps 0.4 # --- green
-    set style line 3 lc rgb '#dd181f' lt 1 lw 4 pt 7 ps 0.4 # --- ?
-    set style line 4 lc rgb '#4d1811' lt 1 lw 4 pt 8 ps 0.4 # --- ?
-    set style line 5 lc rgb '#1d121f' lt 1 lw 4 pt 9 ps 0.4 # --- ?
-    plot "x.projected.profile" using 1:2 t "Depth coverage" with lines ls 2
+    COVERAGE_NAME="coverage-SPECIFIC.pdf";
+    CHECK_INPUT "$OUTPUT/SPECIFIC_$SPECIFIC/SPECIFIC-coverage.bed";
+    #
+    TOTAL_SIZE=`tail -n 1 $OUTPUT/SPECIFIC_$SPECIFIC/SPECIFIC-coverage.bed | awk '{ print $3}'`;
+    ZERO_COVERAGE=`awk '{sum += ($3-$2)} END {print sum}' $OUTPUT/SPECIFIC_$SPECIFIC/SPECIFIC-zero-coverage.bed`;
+    if [ -z $ZERO_COVERAGE ]
+      then
+      ZERO_COVERAGE=0;
+      fi
+    BREADTH=`echo "scale=4; (100-(($ZERO_COVERAGE/$TOTAL_SIZE)*100))" | bc -l`;
+    #
+    rm -f x.projected.profile;
+    ./TRACES_project_coordinates.sh $OUTPUT/SPECIFIC_$SPECIFIC/SPECIFIC-coverage.bed $COVERAGE_MAX | gto_filter -w $COVERAGE_WINDOW_SIZE -d $COVERAGE_DROP > x.projected.profile;
+    DEPTH=`./TRACES_project_coordinates.sh $OUTPUT/SPECIFIC_$SPECIFIC/SPECIFIC-coverage.bed $COVERAGE_MAX | awk '{sum+=$2} END { print sum/NR}'`;
+    #
+    printf "SPECIFIC\t$GID\t$TOTAL_SIZE\t$SIMILARITY\t$BREADTH\t$DEPTH\n" >> $OUTPUT/final-results.txt;
+    #
+    if [[ "$COVERAGE_LOG_SCALE" -eq "" ]];
+      then
+      gnuplot << EOF
+      reset
+      set terminal pdfcairo enhanced color font 'Verdana,12'
+      set output "$COVERAGE_NAME"
+      set style line 101 lc rgb '#000000' lt 1 lw 4
+      set border 3 front ls 101
+      set tics nomirror out scale 0.75
+      set format '%g'
+      set size ratio 0.2
+      set key outside horiz center top
+      set yrange [$COVERAGE_MIN_X:]
+      set xrange [:]
+      set xtics auto
+      set grid
+      set ylabel "Depth"
+      set xlabel "Position"
+      set border linewidth 1.5
+      set style line 1 lc rgb '#0060ad' lt 1 lw 2 pt 5 ps 0.4 # --- blue
+      set style line 2 lc rgb '#000000' lt 1 lw 2 pt 6 ps 0.4 # --- green
+      set style line 3 lc rgb '#dd181f' lt 1 lw 4 pt 7 ps 0.4 # --- ?
+      set style line 4 lc rgb '#4d1811' lt 1 lw 4 pt 8 ps 0.4 # --- ?
+      set style line 5 lc rgb '#1d121f' lt 1 lw 4 pt 9 ps 0.4 # --- ?
+      plot "x.projected.profile" using 1:2 t "Depth coverage" with lines ls 2
 EOF
-    else
-    gnuplot << EOF
-    reset
-    set terminal pdfcairo enhanced color font 'Verdana,12'
-    set output "$COVERAGE_NAME"
-    set style line 101 lc rgb '#000000' lt 1 lw 4
-    set border 3 front ls 101
-    set tics nomirror out scale 0.75
-    set format '%g'
-    set size ratio 0.2
-    set key outside horiz center top
-    set yrange [$COVERAGE_MIN_X:]
-    set xrange [:]
-    set xtics auto
-    set logscale y $COVERAGE_LOG_SCALE
-    set grid
-    set ylabel "Depth"
-    set xlabel "Position"
-    set border linewidth 1.5
-    set style line 1 lc rgb '#0060ad' lt 1 lw 2 pt 5 ps 0.4 # --- blue
-    set style line 2 lc rgb '#000000' lt 1 lw 2 pt 6 ps 0.4 # --- green
-    set style line 3 lc rgb '#dd181f' lt 1 lw 4 pt 7 ps 0.4 # --- ?
-    set style line 4 lc rgb '#4d1811' lt 1 lw 4 pt 8 ps 0.4 # --- ?
-    set style line 5 lc rgb '#1d121f' lt 1 lw 4 pt 9 ps 0.4 # --- ?
-    plot "x.projected.profile" using 1:2 t "Depth coverage" with lines ls 2
+      else
+      gnuplot << EOF
+      reset
+      set terminal pdfcairo enhanced color font 'Verdana,12'
+      set output "$COVERAGE_NAME"
+      set style line 101 lc rgb '#000000' lt 1 lw 4
+      set border 3 front ls 101
+      set tics nomirror out scale 0.75
+      set format '%g'
+      set size ratio 0.2
+      set key outside horiz center top
+      set yrange [$COVERAGE_MIN_X:]
+      set xrange [:]
+      set xtics auto
+      set logscale y $COVERAGE_LOG_SCALE
+      set grid
+      set ylabel "Depth"
+      set xlabel "Position"
+      set border linewidth 1.5
+      set style line 1 lc rgb '#0060ad' lt 1 lw 2 pt 5 ps 0.4 # --- blue
+      set style line 2 lc rgb '#000000' lt 1 lw 2 pt 6 ps 0.4 # --- green
+      set style line 3 lc rgb '#dd181f' lt 1 lw 4 pt 7 ps 0.4 # --- ?
+      set style line 4 lc rgb '#4d1811' lt 1 lw 4 pt 8 ps 0.4 # --- ?
+      set style line 5 lc rgb '#1d121f' lt 1 lw 4 pt 9 ps 0.4 # --- ?
+      plot "x.projected.profile" using 1:2 t "Depth coverage" with lines ls 2
 EOF
-    fi
-  #
-  cp coverage-SPECIFIC.pdf $OUTPUT/SPECIFIC_$SPECIFIC/
-  rm -f coverage-SPECIFIC.pdf x.projected.profile;
+      fi
+    #
+    cp coverage-SPECIFIC.pdf $OUTPUT/SPECIFIC_$SPECIFIC/
+    rm -f coverage-SPECIFIC.pdf x.projected.profile;
+  fi
   #
   rm -f SPECIFIC-consensus.fa SPECIFIC-zero-coverage.bed SPECIFIC-coverage.bed \
   SPECIFIC-calls.bed SPECIFIC-calls.vcf.gz SPECIFIC-calls.norm.flt-indels.vcf.gz \
@@ -488,7 +497,7 @@ if [[ "$RUN" -eq "1" ]];
       gto_fasta_extract_read_by_pattern -p "$GID" < $DATABASE | awk '/^>/{if(N)exit;++N;} {print;}' > $V_NAME.fa;
       #
       bwa index $V_NAME.fa
-      bwa aln -l 1000 -n 0.01 $V_NAME.fa reads-tracespipe-run-tmp.fq > $V_NAME-READS.sai
+      bwa aln -t $THREADS -l 1000 -n 0.01 $V_NAME.fa reads-tracespipe-run-tmp.fq > $V_NAME-READS.sai
       bwa samse $V_NAME.fa $V_NAME-READS.sai reads-tracespipe-run-tmp.fq > $V_NAME-READS.sam
       samtools view -bSh $V_NAME-READS.sam > $V_NAME-READS.bam;
       samtools view -bh -F4 $V_NAME-READS.bam > FIL-$V_NAME-READS.bam;
