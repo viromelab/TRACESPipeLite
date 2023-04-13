@@ -2,7 +2,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](LICENSE)
 [![Speed](https://img.shields.io/static/v1.svg?label=Ultra-Fast&message=Ultra%20speed%20performance&color=green)](#)
-[![Release](https://img.shields.io/static/v1.svg?label=Release&message=v2.1.0&color=orange)](#)
+[![Release](https://img.shields.io/static/v1.svg?label=Release&message=v2.2.0&color=orange)](#)
 
 TRACESPipeLite is the reference-based version of TRACESPipe. TRACESPipeLite is oriented for human viral genome classification, specifically to apply directly in clinical virology backgrounds. It provides the ultra-fast reconstruction of viral genomes while automatically generating consensus sequences, breadth and depth coverage values and profiles, and others. The viral database is freely provided. Assembly is exclusively reference-based and can be used in the provided database, but not limited.
 
@@ -133,7 +133,7 @@ This command will output the following content
 ```
  -------------------------------------------------------- 
                                                           
- TRACESPipeLite.sh : TRACESPipe lite version v2.1         
+ TRACESPipeLite.sh : TRACESPipe lite version v2.2         
                                                           
  This is a lite version of TRACESPipe. It provides        
  automatic reconstruction (reference-based only) of       
@@ -141,33 +141,36 @@ This command will output the following content
                                                           
  Program options ---------------------------------------- 
                                                           
- -h, --help                     Show this,                
- -i, --install                  Installation (w/ conda),  
+ -h, --help                      Show this,               
+ -i, --install                   Installation (w/ conda), 
                                                           
- -lg <INT>, --log-scale <INT>   Coverage log scale,       
- -ws <INT>, --window <INT>      Coverage window size,     
- -dr <INT>, --drop <INT>        Coverage drop size,       
- -cx <INT>, --start <INT>       Coverage start x-axis,    
- -ma <INT>, --maximum <INT>     Coverage maximum (crop),  
- -si <INT>, --similarity <DBL>  Minimum similarity for    
-                                applying reconstruction,  
- -s  <STR>, --specific <STR>    Use specific sequence,    
- -os,       --only-specific     Run only specific,        
+ -np,       --no-plots           NO coverage plots,       
+ -lg <INT>, --log-scale <INT>    Coverage log scale,      
+ -ws <INT>, --window <INT>       Coverage window size,    
+ -dr <INT>, --drop <INT>         Coverage drop size,      
+ -cx <INT>, --start <INT>        Coverage start x-axis,   
+ -ma <INT>, --maximum <INT>      Coverage maximum (crop), 
+ -si <INT>, --similarity <DBL>   Minimum similarity for   
+                                 applying reconstruction, 
+ -s  <STR>, --specific <STR>     Use specific sequence,   
+ -os,       --only-specific      Run only specific,       
                                                           
- -t  <INT>, --threads <INT>     Number of threads,        
- -o  <STR>, --output <STR>      Output folder name,       
+ -fh,       --filter-human       Filter human DNA,        
                                                           
- -r1 <STR>, --reads1 <STR>      FASTQ reads (forward),    
- -r2 <STR>, --reads2 <STR>      FASTQ reads (reverse),    
+ -t  <INT>, --threads <INT>      Number of threads,       
+ -o  <STR>, --output <STR>       Output folder name,      
                                                           
- -db <STR>, --database <STR>    FASTA Viral Database.     
+ -r1 <STR>, --reads1 <STR>       FASTQ reads (forward),   
+ -r2 <STR>, --reads2 <STR>       FASTQ reads (reverse),   
+                                                          
+ -db <STR>, --database <STR>     FASTA Viral Database.    
                                                           
  Example -----------------------------------------------  
                                                           
  TRACESPipeLite.sh --reads1 reads_forward.fq.gz \        
    --reads2 reads_reverse.fq.gz --database VDB.mfa \     
-   --output lite_viral_analysis --threads 8               
-                                                          
+   --output lite_viral_analysis --threads 8  
+
  -------------------------------------------------------
 ```
 
