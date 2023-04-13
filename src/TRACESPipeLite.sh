@@ -151,7 +151,7 @@ while [[ $# -gt 0 ]]
       HELP=1;
       shift
     ;;
-    -c|--install|--compile)
+    -i|-c|--install|--compile)
       INSTALL=1;
       shift
     ;;
