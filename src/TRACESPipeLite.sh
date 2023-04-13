@@ -1,13 +1,18 @@
 #!/bin/bash
 #
+STUDY="data";
 RUN="0";
 INSTALL="0";
 THREADS="8";
 PLOTS="0";
 READS1="";
 READS2="";
+FILTER_HUMAN="0";
+HUMAN_FASTA="chm13v2.0.fa.gz";
 DATABASE="VDB.mfa";
 OUTPUT="out_analysis";
+MIN_LEN="20";
+BWA_N="0.02";
 MIN_SIMILARITY="3.0";
 MAX_COVERAGE_PROFILE=0;
 COVERAGE_MIN_X="0";
@@ -24,7 +29,7 @@ SPECIFIC_ONLY="0";
 SHOW_MENU () {
   echo " -------------------------------------------------------- ";
   echo "                                                          ";
-  echo " TRACESPipeLite.sh : TRACESPipe lite version v2.1         ";
+  echo " TRACESPipeLite.sh : TRACESPipe lite version v2.2         ";
   echo "                                                          ";
   echo " This is a lite version of TRACESPipe. It provides        ";
   echo " automatic reconstruction (reference-based only) of       ";
@@ -32,27 +37,29 @@ SHOW_MENU () {
   echo "                                                          ";
   echo " Program options ---------------------------------------- ";
   echo "                                                          ";
-  echo " -h, --help                     Show this,                ";
-  echo " -i, --install                  Installation (w/ conda),  ";
+  echo " -h, --help                      Show this,               ";
+  echo " -i, --install                   Installation (w/ conda), ";
   echo "                                                          ";
-  echo " -np,       --no-plots          NO coverage plots,        ";
-  echo " -lg <INT>, --log-scale <INT>   Coverage log scale,       ";
-  echo " -ws <INT>, --window <INT>      Coverage window size,     ";
-  echo " -dr <INT>, --drop <INT>        Coverage drop size,       ";
-  echo " -cx <INT>, --start <INT>       Coverage start x-axis,    ";
-  echo " -ma <INT>, --maximum <INT>     Coverage maximum (crop),  ";
-  echo " -si <INT>, --similarity <DBL>  Minimum similarity for    ";
-  echo "                                applying reconstruction,  ";
-  echo " -s  <STR>, --specific <STR>    Use specific sequence,    ";
-  echo " -os,       --only-specific     Run only specific,        ";
+  echo " -np,       --no-plots           NO coverage plots,       ";
+  echo " -lg <INT>, --log-scale <INT>    Coverage log scale,      ";
+  echo " -ws <INT>, --window <INT>       Coverage window size,    ";
+  echo " -dr <INT>, --drop <INT>         Coverage drop size,      ";
+  echo " -cx <INT>, --start <INT>        Coverage start x-axis,   ";
+  echo " -ma <INT>, --maximum <INT>      Coverage maximum (crop), ";
+  echo " -si <INT>, --similarity <DBL>   Minimum similarity for   ";
+  echo "                                 applying reconstruction, ";
+  echo " -s  <STR>, --specific <STR>     Use specific sequence,   ";
+  echo " -os,       --only-specific      Run only specific,       ";
   echo "                                                          ";
-  echo " -t  <INT>, --threads <INT>     Number of threads,        ";
-  echo " -o  <STR>, --output <STR>      Output folder name,       ";
+  echo " -fh,       --filter-human       Filter human DNA,        ";
   echo "                                                          ";
-  echo " -r1 <STR>, --reads1 <STR>      FASTQ reads (forward),    ";
-  echo " -r2 <STR>, --reads2 <STR>      FASTQ reads (reverse),    ";
+  echo " -t  <INT>, --threads <INT>      Number of threads,       ";
+  echo " -o  <STR>, --output <STR>       Output folder name,      ";
   echo "                                                          ";
-  echo " -db <STR>, --database <STR>    FASTA Viral Database.     ";
+  echo " -r1 <STR>, --reads1 <STR>       FASTQ reads (forward),   ";
+  echo " -r2 <STR>, --reads2 <STR>       FASTQ reads (reverse),   ";
+  echo "                                                          ";
+  echo " -db <STR>, --database <STR>     FASTA Viral Database.    ";
   echo "                                                          ";
   echo " Example -----------------------------------------------  ";
   echo "                                                          ";
@@ -99,6 +106,7 @@ CHECK_PROGRAMS () {
   PROGRAM_EXISTS "gto_filter";
   PROGRAM_EXISTS "FALCON";
   PROGRAM_EXISTS "bwa";
+  PROGRAM_EXISTS "bowtie2";
   PROGRAM_EXISTS "samtools";
   PROGRAM_EXISTS "bcftools";
   PROGRAM_EXISTS "bedops";
@@ -168,6 +176,10 @@ while [[ $# -gt 0 ]]
     -db|--database)
       DATABASE="$2";
       shift 2;
+    ;;
+    -fh|--filter-human)
+      FILTER_HUMAN="1";
+      shift;
     ;;
     -lg|--log-scale)
       COVERAGE_LOG_SCALE="$2";
@@ -243,6 +255,7 @@ if [[ "$INSTALL" -eq "1" ]];
   conda install -c cobilab gto -y
   conda install -c cobilab falcon -y
   conda install -c bioconda bwa -y
+  conda install -c bioconda bowtie2 -y
   conda install -c bioconda igv -y
   conda install -c bioconda samtools=1.9 -y
   conda install -c bioconda bcftools=1.9 -y
@@ -256,15 +269,54 @@ if [[ "$INSTALL" -eq "1" ]];
   echo "TACACTCTTTCCCTACACGACGCTCTTCCGATCT      AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA" >  adapters_ar.fa;
   echo "GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCT      AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC" >> adapters_ar.fa;
   echo "Done!";
+  #
+  echo "Building human to filter human DNA from reads ...";
+  wget https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/CHM13/assemblies/analysis_set/chm13v2.0.fa.gz
+  gunzip chm13v2.0.fa.gz
+  bowtie2-build chm13v2.0.fa host_DB
+  echo "Done!";
+  #
   exit;
   #
   fi
 #
 ################################################################################
 #
+  if [[ "$FILTER_HUMAN" -eq "1" ]];
+    then
+    #
+    echo "Removing host data ...";
+    CHECK_FILE "$HOST_FASTA";
+    CHECK_INPUT $READS1
+    CHECK_INPUT $READS2
+    #
+    bowtie2 -p $THREADS -x host_DB -1 $READS1 -2 $READS2 --un-conc-gz SAMPLE_host_removed > $STUDY-data.sam 2>> report_stderr.txt
+    samtools view -bS $STUDY-data.sam > $STUDY-data.bam 2>> report_stderr.txt
+    samtools view -b -f 12 -F 256 $STUDY-data.bam > $STUDY-data-no-human.bam 2>> report_stderr.txt
+    samtools sort -n -o $STUDY-sorted-data.bam $STUDY-data-no-human.bam 1>> report_stdout.txt 2>> report_stderr.txt
+    samtools fastq -1 $STUDY-reads-r1.fq -2 $STUDY-reads-r2.fq $STUDY-sorted-data.bam 1>> report_stdout.txt 2>> report_stderr.txt
+    #
+    else
+    #
+    echo "Uncompressing reads ...";
+    zcat $READS1 > $STUDY-reads-r1.fq;
+    zcat $READS2 > $STUDY-reads-r2.fq;
+    #
+  fi
+#
+# ===========================================================================
+  # INFORM SIZE OF UNCOMPRESSED READS -----------------------------------------
+  #
+  FIL_READS_SIZE_1=`ls -lah $STUDY-reads-r1.fq | awk '{ print $5; }'`;
+  FIL_READS_SIZE_2=`ls -lah $STUDY-reads-r2.fq | awk '{ print $5; }'`;
+  echo "READS1: $FIL_READS_SIZE_1 - READS2: $FIL_READS_SIZE_2";
+  #
+#
+################################################################################
+#
 if [[ "$SPECIFIC_ON" -eq "1" || "$RUN" -eq "1" ]]
   then
-  CHECK_INPUT $READS1
+  CHECK_INPUT $STUDY-reads-r1.fq
   CHECK_INPUT adapters_ar.fa
   CHECK_PROGRAMS
   #
@@ -275,13 +327,16 @@ if [[ "$SPECIFIC_ON" -eq "1" || "$RUN" -eq "1" ]]
   #
   if [[ $READS2 = *[!\ ]* ]];
     then
-    AdapterRemoval --threads $THREADS --file1 $READS1 --file2 $READS2 \
+    AdapterRemoval --threads $THREADS \
+    --file1 $STUDY-reads-r1.fq --file2 $STUDY-reads-r2.fq \
     --outputcollapsed reads-tracespipe-run-tmp.fq --trimns --trimqualities \
-    --minlength 20 --collapse --adapter-list adapters_ar.fa --basename AXTRL
+    --minlength $MIN_LEN --collapse --adapter-list adapters_ar.fa \
+    --basename AXTRL
     else
-    AdapterRemoval --threads $THREADS --file1 $READS1 \
+    AdapterRemoval --threads $THREADS --file1 $STUDY-reads-r1.fq \
     --outputcollapsed reads-tracespipe-run-tmp.fq --trimns --trimqualities \
-    --minlength 20 --collapse --adapter-list adapters_ar.fa --basename AXTRL
+    --minlength $MIN_LEN --collapse --adapter-list adapters_ar.fa \
+    --basename AXTRL
     fi
   #
   rm -f AXTRL.*;
@@ -306,7 +361,7 @@ if [[ "$SPECIFIC_ON" -eq "1" ]];
   cp $SPECIFIC SPECIFIC.fa
   #
   bwa index SPECIFIC.fa
-  bwa aln -t $THREADS -l 1000 -n 0.01 SPECIFIC.fa reads-tracespipe-run-tmp.fq > SPECIFIC-READS.sai
+  bwa aln -t $THREADS -l 1000 -n $BWA_N SPECIFIC.fa reads-tracespipe-run-tmp.fq > SPECIFIC-READS.sai
   bwa samse SPECIFIC.fa SPECIFIC-READS.sai reads-tracespipe-run-tmp.fq > SPECIFIC-READS.sam
   samtools view -bSh SPECIFIC-READS.sam > SPECIFIC-READS.bam;
   samtools view -bh -F4 SPECIFIC-READS.bam > FIL-SPECIFIC-READS.bam;
@@ -497,7 +552,7 @@ if [[ "$RUN" -eq "1" ]];
       gto_fasta_extract_read_by_pattern -p "$GID" < $DATABASE | awk '/^>/{if(N)exit;++N;} {print;}' > $V_NAME.fa;
       #
       bwa index $V_NAME.fa
-      bwa aln -t $THREADS -l 1000 -n 0.01 $V_NAME.fa reads-tracespipe-run-tmp.fq > $V_NAME-READS.sai
+      bwa aln -t $THREADS -l 1000 -n $BW_N $V_NAME.fa reads-tracespipe-run-tmp.fq > $V_NAME-READS.sai
       bwa samse $V_NAME.fa $V_NAME-READS.sai reads-tracespipe-run-tmp.fq > $V_NAME-READS.sam
       samtools view -bSh $V_NAME-READS.sam > $V_NAME-READS.bam;
       samtools view -bh -F4 $V_NAME-READS.bam > FIL-$V_NAME-READS.bam;
