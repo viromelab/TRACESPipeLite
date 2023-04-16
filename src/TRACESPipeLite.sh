@@ -286,7 +286,7 @@ if [[ "$INSTALL" -eq "1" ]];
     then
     #
     echo "Removing host data ...";
-    CHECK_FILE "$HOST_FASTA";
+    #CHECK_INPUT "$HOST_FASTA";
     CHECK_INPUT $READS1
     CHECK_INPUT $READS2
     #
@@ -552,7 +552,7 @@ if [[ "$RUN" -eq "1" ]];
       gto_fasta_extract_read_by_pattern -p "$GID" < $DATABASE | awk '/^>/{if(N)exit;++N;} {print;}' > $V_NAME.fa;
       #
       bwa index $V_NAME.fa
-      bwa aln -t $THREADS -l 1000 -n $BW_N $V_NAME.fa reads-tracespipe-run-tmp.fq > $V_NAME-READS.sai
+      bwa aln -t $THREADS -l 1000 -n $BWA_N $V_NAME.fa reads-tracespipe-run-tmp.fq > $V_NAME-READS.sai
       bwa samse $V_NAME.fa $V_NAME-READS.sai reads-tracespipe-run-tmp.fq > $V_NAME-READS.sam
       samtools view -bSh $V_NAME-READS.sam > $V_NAME-READS.bam;
       samtools view -bh -F4 $V_NAME-READS.bam > FIL-$V_NAME-READS.bam;
